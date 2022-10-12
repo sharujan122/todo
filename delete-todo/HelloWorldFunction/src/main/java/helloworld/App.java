@@ -39,16 +39,14 @@ public class App implements RequestHandler<APIGatewayProxyRequestEvent, APIGatew
             AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
             DynamoDB dynamoDB = new DynamoDB(client);
 
+            // Add input
+            int id = 0;
+
+            //delete value
             Table table = dynamoDB.getTable("task-list");
-            String task = "x";
-            Boolean Stat = false;
+            DeleteItemOutcome outcome = table.deleteItem("Id", id);
 
-            Item item = new Item() // Build the item
-                    .withPrimaryKey("Id", 123)
-                    .withString("Task", task)
-                    .withBoolean("Completed", Stat);
 
-            PutItemOutcome outcome = table.putItem(item);// Write the item to the table
 
             return response
                     .withStatusCode(200)

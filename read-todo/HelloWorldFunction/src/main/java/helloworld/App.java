@@ -5,11 +5,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.document.*;
+import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
@@ -38,17 +41,20 @@ public class App implements RequestHandler<APIGatewayProxyRequestEvent, APIGatew
             final String pageContents = this.getPageContents("https://checkip.amazonaws.com");
             AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
             DynamoDB dynamoDB = new DynamoDB(client);
-
             Table table = dynamoDB.getTable("task-list");
-            String task = "x";
-            Boolean Stat = false;
 
-            Item item = new Item() // Build the item
-                    .withPrimaryKey("Id", 123)
-                    .withString("Task", task)
-                    .withBoolean("Completed", Stat);
+            QuerySpec spec = new QuerySpec();spec
+                    .withKeyConditionExpression("Id = v_id")
+                    .withValueMap(new ValueMap()
+                            .withString(":v_id", "Amazon DynamoDB#DynamoDB Thread 1"));
+            ItemCollection<QueryOutcome> items = table.query(spec);
 
-            PutItemOutcome outcome = table.putItem(item);// Write the item to the table
+            Iterator<Item> iterator = items.iterator();
+            Item item = null;
+            while (iterator.hasNext()) {
+                item = iterator.next();
+                System.out.println(item.toJSONPretty());
+            }
 
             return response
                     .withStatusCode(200)

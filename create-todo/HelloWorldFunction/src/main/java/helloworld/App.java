@@ -31,7 +31,6 @@ public class App implements RequestHandler<APIGatewayProxyRequestEvent, APIGatew
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
         headers.put("X-Custom-Header", "application/json");
-        input.get
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
                 .withHeaders(headers);
         try {
@@ -41,8 +40,7 @@ public class App implements RequestHandler<APIGatewayProxyRequestEvent, APIGatew
 
             //Convert input into variables
             Gson gson = new Gson();
-            String name = new String();
-            gson.fromJson(input.getHeaders());
+            T t = gson.fromJson(input,T.class);
 
             Table table = dynamoDB.getTable("task-list");
             String task = "x";
@@ -64,6 +62,12 @@ public class App implements RequestHandler<APIGatewayProxyRequestEvent, APIGatew
                     .withBody("{}")
                     .withStatusCode(500);
         }
+    }
+
+    class UserSimple {
+        int key;
+        String task = new String();
+        Boolean Stat = false;
     }
 
     private String getPageContents(String address) throws IOException{
